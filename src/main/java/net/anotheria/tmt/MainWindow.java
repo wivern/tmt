@@ -140,13 +140,6 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
     }
 
     private void refreshTextResources() {
-        setTitle(Resources.get("app.name.full"));
-        status.setText(Resources.get("app.gui.status"));
-        myIP.setText(Resources.get("app.gui.my-ip"));
-        wanIP.setText(Resources.get("app.gui.wan-ip"));
-        debug.setText(Resources.get("app.gui.debug"));
-        refreshButton.setText(Resources.get("app.gui.refresh"));
-
         stateStatusMap = new HashMap<State, String>() {{
             put(State.CONNECTED, Resources.get("state.connected"));
             put(State.DISCONNECTED, Resources.get("state.disconnected"));
@@ -154,5 +147,13 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
             put(State.REFRESH_ON_FAILURE, Resources.get("state.refresh-on-failure"));
             put(State.NONE, Resources.get("state.ip-not-provided"));
         }};
+
+        setTitle(Resources.get("app.name.full"));
+        status.setText(Resources.get("app.gui.status"));
+        myIP.setText(Resources.get("app.gui.my-ip"));
+        wanIP.setText(Resources.get("app.gui.wan-ip"));
+        debug.setText(Resources.get("app.gui.debug"));
+        refreshButton.setText(Resources.get("app.gui.refresh"));
+        statusText.setText(getStatusText(bulb.getState()));
     }
 }
