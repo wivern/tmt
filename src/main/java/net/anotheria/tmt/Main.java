@@ -27,7 +27,7 @@ public class Main {
                         window.addWindowListener(new WindowAdapter() {
                             @Override
                             public void windowClosing(WindowEvent e) {
-                                systemTray.displayMessage("Application still running.");
+                                systemTray.displayMessage("Application is still running.");
                             }
                         });
                         tmt.addStateChangedListener(systemTray);
