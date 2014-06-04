@@ -21,8 +21,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
     private Bulb bulb;
     private State state;
     private JTextField statusText;
-
-    private Map<State, String> stateStatusMap = new HashMap<State, String>(){{
+    private Map<State, String> stateStatusMap = new HashMap<State, String>() {{
         put(State.CONNECTED, "Connected");
         put(State.DISCONNECTED, "Disconnected");
         put(State.REFRESH_ON_SUCCESS, "Connecting");
@@ -57,7 +56,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
         JLabel label = new JLabel("Tunnel Management Tool");
         label.setAlignmentX(CENTER_ALIGNMENT);
         Font font = label.getFont();
-        if (font != null){
+        if (font != null) {
             label.setFont(new Font(font.getName(), Font.BOLD, 14));
         }
 //        topPanel.add(label);
@@ -143,7 +142,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
         systemTray.setState(State.REFRESH_ON_SUCCESS);
     }
 
-    protected void setState(State state){
+    protected void setState(State state) {
         this.state = state;
         bulb.setState(state);
         statusText.setText(getStatusText(state));
