@@ -1,15 +1,14 @@
 package net.anotheria.tmt.widgets;
 
+import net.anotheria.tmt.State;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author VKoulakov
@@ -83,13 +82,5 @@ public class Bulb extends JComponent implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         blink = !blink;
         repaint();
-    }
-
-    public enum State {
-        NONE,
-        CONNECTED,
-        DISCONNECTED,
-        REFRESH_ON_SUCCESS,
-        REFRESH_ON_FAILURE
     }
 }

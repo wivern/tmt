@@ -11,13 +11,21 @@ import java.awt.*;
  * @since 03.06.14 14:05
  */
 public class MainWindow extends JFrame {
+    private SystemTray systemTray;
 
     public MainWindow() throws HeadlessException {
         setTitle("TMT");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(600, 450);
         setPreferredSize(new Dimension(600, 560));
         setLocationRelativeTo(null);
+
+        if (java.awt.SystemTray.isSupported()) {
+            systemTray = new SystemTray(this);
+            setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        } else {
+            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        }
+
         buildUI();
     }
 
@@ -106,6 +114,7 @@ public class MainWindow extends JFrame {
         getContentPane().add(panel);
         pack();
 
-        bulb.setState(Bulb.State.REFRESH_ON_SUCCESS);
+        bulb.setState(State.REFRESH_ON_SUCCESS);
+        systemTray.setState(State.REFRESH_ON_SUCCESS);
     }
 }

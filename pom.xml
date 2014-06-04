@@ -7,5 +7,12 @@
     <groupId>net.anotheria.tmt</groupId>
     <artifactId>tmt</artifactId>
     <version>1.0-SNAPSHOT</version>
-    
+
+    <dependencies>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>platform</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+    </dependencies>
 </project>
