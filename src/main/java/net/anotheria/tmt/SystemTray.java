@@ -4,6 +4,7 @@ import net.anotheria.tmt.events.LocaleChangedEvent;
 import net.anotheria.tmt.events.LocaleChangedEventListener;
 import net.anotheria.tmt.events.StateChangedEvent;
 import net.anotheria.tmt.events.StateChangedEventListener;
+import net.anotheria.tmt.utils.StringUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -97,7 +98,7 @@ public class SystemTray implements StateChangedEventListener, LocaleChangedEvent
 
         languagesSubmenu = new JMenu();
         for(final Locale locale: Resources.getAvailableLocalizations()) {
-            JMenuItem lang = new JMenuItem(locale.getDisplayName());
+            JMenuItem lang = new JMenuItem(StringUtils.capitalizeFirstLetter(locale.getDisplayName(locale)));
             lang.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
