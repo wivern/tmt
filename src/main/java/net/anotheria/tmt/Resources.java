@@ -1,8 +1,6 @@
 package net.anotheria.tmt;
 
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * User: AAbushkevich
@@ -11,17 +9,28 @@ import java.util.ResourceBundle;
  */
 public class Resources {
     private static ResourceBundle bundle;
+    private static List<Locale> availableLocalizations = new ArrayList<Locale>() {{
+        add(new Locale("EN"));
+        add(new Locale("RU"));
+    }};
 
     public static void init() {
-        try {
-            bundle = ResourceBundle.getBundle("i18n.Resources", Locale.getDefault());
-        } catch(MissingResourceException e) {
-            System.out.print("WARN! No localization resources for system default locale (" + Locale.getDefault() + ")");
-            bundle = ResourceBundle.getBundle("i18n.Resources", Locale.ENGLISH);
-        }
+        setLocalization(Locale.getDefault());
     }
 
     public static String get(String key) {
         return bundle.getString(key);
+    }
+
+    public static void setLocalization(Locale locale) {
+        try {
+            bundle = ResourceBundle.getBundle("i18n.Resources", locale);
+        } catch(MissingResourceException e) {
+            bundle = ResourceBundle.getBundle("i18n.Resources", availableLocalizations.get(0));
+        }
+    }
+
+    public static List<Locale> getAvailableLocalizations() {
+        return availableLocalizations;
     }
 }

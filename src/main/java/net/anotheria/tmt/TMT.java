@@ -1,10 +1,7 @@
 package net.anotheria.tmt;
 
 import net.anotheria.tmt.config.Configuration;
-import net.anotheria.tmt.events.ConfigurationChangedEvent;
-import net.anotheria.tmt.events.ConfigurationChangedEventListener;
-import net.anotheria.tmt.events.StateChangedEvent;
-import net.anotheria.tmt.events.StateChangedEventListener;
+import net.anotheria.tmt.events.*;
 import net.anotheria.tmt.pinger.NativePinger;
 import net.anotheria.tmt.process.ConfigWorker;
 import net.anotheria.tmt.process.PingWorker;
@@ -13,12 +10,11 @@ import net.anotheria.tmt.utils.StringUtils;
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EventListener;
 import java.util.EventObject;
+import java.util.Locale;
 
 /**
  * @author VKoulakov
@@ -55,6 +51,11 @@ public class TMT {
         restartPingWorker(configuration);
     }
 
+    public void setLocale(Locale locale) {
+        Resources.setLocalization(locale);
+        fireLocaleChanged(new LocaleChangedEvent(this, locale));
+    }
+
     protected void setState(State state) {
         this.state = state;
         fireStateChanged(new StateChangedEvent(this, state));
@@ -64,20 +65,12 @@ public class TMT {
         return configuration;
     }
 
-    public void addStateChangedListener(StateChangedEventListener listener) {
-        listenerList.add(StateChangedEventListener.class, listener);
+    public void addEventListener(EventListener listener, Class clazz) {
+        listenerList.add(clazz, listener);
     }
 
-    public void addConfigurationChangedEventListener(ConfigurationChangedEventListener listener) {
-        listenerList.add(ConfigurationChangedEventListener.class, listener);
-    }
-
-    public void removeStateChangedListener(StateChangedEventListener listener) {
-        listenerList.remove(StateChangedEventListener.class, listener);
-    }
-
-    public void removeConfigurationChanged(ConfigurationChangedEventListener listener) {
-        listenerList.remove(ConfigurationChangedEventListener.class, listener);
+    public void removeEventListener(EventListener listener, Class clazz) {
+        listenerList.remove(clazz, listener);
     }
 
     protected void fireStateChanged(StateChangedEvent event) {
@@ -94,6 +87,15 @@ public class TMT {
             @Override
             public void onEvent(ConfigurationChangedEvent event, ConfigurationChangedEventListener listener) {
                 listener.configurationChanged(event);
+            }
+        });
+    }
+
+    protected void fireLocaleChanged(LocaleChangedEvent event) {
+        fireEvent(event, LocaleChangedEventListener.class, new FireEventCallback<LocaleChangedEvent, LocaleChangedEventListener>() {
+            @Override
+            public void onEvent(LocaleChangedEvent event, LocaleChangedEventListener listener) {
+                listener.localeChanged(event);
             }
         });
     }
