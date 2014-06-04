@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 import java.util.EventListener;
 import java.util.EventObject;
 import java.util.Locale;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author VKoulakov
@@ -30,7 +31,7 @@ public class TMT {
     public final AbstractAction PING_ACTION = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            new PingWorker(TMT.this, new NativePinger()).execute();
+            new PingWorker(semaphore, TMT.this, new NativePinger()).execute();
         }
     };
     protected EventListenerList listenerList = new EventListenerList();
@@ -38,6 +39,7 @@ public class TMT {
     private State state;
     private Timer confTimer;
     private Timer pingTimer;
+    private Semaphore semaphore = new Semaphore(1);
 
     public TMT(Configuration configuration) {
         this.configuration = configuration;
