@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author VKoulakov
  * @since 03.06.14 17:26
  */
-public class Bulb extends JComponent implements ActionListener {
+public class Bulb extends JComponent {
 
     private State state;
     private Timer timer;
@@ -46,7 +46,13 @@ public class Bulb extends JComponent implements ActionListener {
     public void setState(State state) {
         this.state = state;
         if (state.equals(State.REFRESH_ON_SUCCESS) || state.equals(State.REFRESH_ON_FAILURE)){
-            timer = new Timer(500, this);
+            timer = new Timer(500, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    blink = !blink;
+                    repaint();
+                }
+            });
             timer.start();
         } else if (timer != null) {
             timer.stop();
@@ -76,11 +82,5 @@ public class Bulb extends JComponent implements ActionListener {
                 return blink ? red : grey;
         }
         return null;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        blink = !blink;
-        repaint();
     }
 }

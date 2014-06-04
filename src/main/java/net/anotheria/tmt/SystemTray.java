@@ -14,7 +14,7 @@ import java.io.IOException;
  * Date: 04.06.14
  * Time: 12:17
  */
-public class SystemTray implements ActionListener {
+public class SystemTray {
     private JFrame window;
     private TrayIcon trayIcon;
     private State state;
@@ -48,6 +48,10 @@ public class SystemTray implements ActionListener {
         refresh();
     }
 
+    public void displayMessage(String text) {
+        trayIcon.displayMessage("TMT", text, TrayIcon.MessageType.INFO);
+    }
+
     private void refresh() {
         trayIcon.setImage(getStateImage(state));
     }
@@ -71,45 +75,32 @@ public class SystemTray implements ActionListener {
     private void init() throws IOException {
         final java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
 
-        ActionListener exitListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        };
-        ActionListener restoreListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                window.setVisible(true);
-            }
-        };
-
         final JPopupMenu popup = new JPopupMenu();
 
         JMenuItem restore = new JMenuItem("Open");
-        restore.addActionListener(restoreListener);
+        restore.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                window.setVisible(true);
+            }
+        });
         popup.add(restore);
 
         JMenuItem exit = new JMenuItem("Exit");
-        exit.addActionListener(exitListener);
+        exit.addActionListener( new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
         popup.add(exit);
 
         trayIcon = new TrayIcon(grey, "TMT");
-
-        ActionListener actionListener = new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                trayIcon.displayMessage("Action Event",
-                        "An Action Event Has Been Performed!",
-                        TrayIcon.MessageType.INFO);
-            }
-        };
-
-        trayIcon.addActionListener(actionListener);
         trayIcon.addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    popup.setLocation(e.getX(), e.getY());
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    window.setVisible(!window.isVisible());
+                } else if (e.isPopupTrigger()) {
+                    popup.setLocation(e.getX() - (popup.getWidth() / 2), e.getY() - popup.getHeight());
                     popup.setInvoker(popup);
                     popup.setVisible(true);
                 }
@@ -124,17 +115,17 @@ public class SystemTray implements ActionListener {
     }
 
     private void blinkStart() {
-        timer = new Timer(500, this);
+        timer = new Timer(500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                blink = !blink;
+                refresh();
+            }
+        });
         timer.start();
     }
 
     private void blinkStop() {
         timer.stop();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        blink = !blink;
-        refresh();
     }
 }
