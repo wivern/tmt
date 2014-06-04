@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 import java.util.EventListener;
 import java.util.EventObject;
 import java.util.Locale;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author VKoulakov
@@ -27,11 +28,10 @@ public class TMT {
             new ConfigWorker(TMT.this).execute();
         }
     };
-
     public final AbstractAction PING_ACTION = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            new PingWorker(TMT.this, new NativePinger()).execute();
+            new PingWorker(semaphore, TMT.this, new NativePinger()).execute();
         }
     };
     protected EventListenerList listenerList = new EventListenerList();
@@ -39,6 +39,7 @@ public class TMT {
     private State state;
     private Timer confTimer;
     private Timer pingTimer;
+    private Semaphore semaphore = new Semaphore(1);
 
     public TMT(Configuration configuration) {
         this.configuration = configuration;
@@ -56,13 +57,19 @@ public class TMT {
         fireLocaleChanged(new LocaleChangedEvent(this, locale));
     }
 
-    protected void setState(State state) {
-        this.state = state;
-        fireStateChanged(new StateChangedEvent(this, state));
-    }
-
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    public void setConfiguration(Configuration configuration) {
+        fireConfigurationChanged(new ConfigurationChangedEvent(this, configuration));
+        //start config reload
+        restartConfigReload(configuration);
+        //start ping worker
+        if (configuration != null && !configuration.equals(this.configuration)) {
+            restartPingWorker(configuration);
+        }
+        this.configuration = configuration;
     }
 
     public void addEventListener(EventListener listener, Class clazz) {
@@ -107,19 +114,8 @@ public class TMT {
         }
     }
 
-    public void setConfiguration(Configuration configuration) {
-        fireConfigurationChanged(new ConfigurationChangedEvent(this, configuration));
-        //start config reload
-        restartConfigReload(configuration);
-        //start ping worker
-        if (configuration != null && !configuration.equals(this.configuration)){
-            restartPingWorker(configuration);
-        }
-        this.configuration = configuration;
-    }
-
     private void restartConfigReload(Configuration configuration) {
-        if (confTimer != null && confTimer.isRunning()){
+        if (confTimer != null && confTimer.isRunning()) {
             confTimer.stop();
         }
         confTimer = new Timer(configuration.getRefreshConfig() * 1000, CONFIG_REFRESH_ACTION);
@@ -128,7 +124,7 @@ public class TMT {
 
     private void restartPingWorker(Configuration configuration) {
         String targetIp = configuration.getTargetIp();
-        if (StringUtils.notEmpty(targetIp) && validateAddress(targetIp)){
+        if (StringUtils.notEmpty(targetIp) && validateAddress(targetIp)) {
             int refresh = State.DISCONNECTED.equals(state) ? configuration.getRefreshOnFailure() : configuration.getRefreshOnSuccess();
             pingTimer = new Timer(refresh * 1000, PING_ACTION);
             pingTimer.setInitialDelay(0);
@@ -139,7 +135,7 @@ public class TMT {
         }
     }
 
-    private boolean validateAddress(String address){
+    private boolean validateAddress(String address) {
         try {
             InetAddress.getByName(address);
             return true;
@@ -150,6 +146,11 @@ public class TMT {
 
     public State getState() {
         return state;
+    }
+
+    protected void setState(State state) {
+        this.state = state;
+        fireStateChanged(new StateChangedEvent(this, state));
     }
 
     public void changeState(State next) {
