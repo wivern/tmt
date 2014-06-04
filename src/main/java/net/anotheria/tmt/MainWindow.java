@@ -5,6 +5,8 @@ import net.anotheria.tmt.widgets.Bulb;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * @author VKoulakov
@@ -103,6 +105,14 @@ public class MainWindow extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         JButton refreshButton = new JButton("Refresh");
+
+        // example message
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                systemTray.displayMessage("Refreshing.");
+            }
+        });
 
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 1));
         buttonPanel.add(Box.createGlue());
