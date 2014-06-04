@@ -21,7 +21,7 @@ import java.util.concurrent.Semaphore;
  * @author VKoulakov
  * @since 04.06.14 13:05
  */
-public class TMT {
+public class TMT implements RefreshAware {
     public final AbstractAction CONFIG_REFRESH_ACTION = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -31,7 +31,8 @@ public class TMT {
     public final AbstractAction PING_ACTION = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            new PingWorker(semaphore, TMT.this, new NativePinger()).execute();
+            createPingWorker();
+            pingWorker.execute();
         }
     };
     protected EventListenerList listenerList = new EventListenerList();
@@ -40,16 +41,21 @@ public class TMT {
     private Timer confTimer;
     private Timer pingTimer;
     private Semaphore semaphore = new Semaphore(1);
+    private PingWorker pingWorker;
 
     public TMT(Configuration configuration) {
         this.configuration = configuration;
+    }
+
+    private void createPingWorker() {
+        pingWorker = new PingWorker(semaphore, this, new NativePinger());
     }
 
     public void start() {
         setState(State.NONE);
         fireConfigurationChanged(new ConfigurationChangedEvent(this, configuration));
         setConfiguration(configuration);
-        restartPingWorker(configuration);
+        restartPingWorker(configuration, true);
     }
 
     public void setLocale(Locale locale) {
@@ -67,7 +73,7 @@ public class TMT {
         restartConfigReload(configuration);
         //start ping worker
         if (configuration != null && !configuration.equals(this.configuration)) {
-            restartPingWorker(configuration);
+            restartPingWorker(configuration, true);
         }
         this.configuration = configuration;
     }
@@ -122,12 +128,18 @@ public class TMT {
         confTimer.start();
     }
 
-    private void restartPingWorker(Configuration configuration) {
+    private void restartPingWorker(Configuration configuration, boolean immediate) {
         String targetIp = configuration.getTargetIp();
         if (StringUtils.notEmpty(targetIp) && validateAddress(targetIp)) {
             int refresh = State.DISCONNECTED.equals(state) ? configuration.getRefreshOnFailure() : configuration.getRefreshOnSuccess();
+            if (pingTimer != null && pingTimer.isRunning()) {
+                pingTimer.stop();
+            }
+
             pingTimer = new Timer(refresh * 1000, PING_ACTION);
-            pingTimer.setInitialDelay(0);
+            if (immediate){
+                pingTimer.setInitialDelay(0);
+            }
             pingTimer.setRepeats(true);
             pingTimer.start();
         } else {
@@ -155,6 +167,22 @@ public class TMT {
 
     public void changeState(State next) {
         setState(next);
+        if (!State.REFRESH_ON_FAILURE.equals(next) && !State.REFRESH_ON_SUCCESS.equals(next) &&
+                pingTimer != null && !pingTimer.isRunning()){
+            restartPingWorker(configuration, false);
+        }
+    }
+
+    @Override
+    public void refresh() {
+        if (pingWorker != null) {
+            pingWorker.cancel(true);
+        }
+        if (pingTimer != null && pingTimer.isRunning())
+            pingTimer.stop();
+        semaphore.release();
+        createPingWorker();
+        pingWorker.execute();
     }
 
     interface FireEventCallback<E extends EventObject, L extends EventListener> {

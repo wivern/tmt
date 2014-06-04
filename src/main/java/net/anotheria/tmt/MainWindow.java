@@ -7,6 +7,7 @@ import net.anotheria.tmt.widgets.Bulb;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,15 +25,15 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
     private JTextField wanIPText;
     private JTextArea debugText;
 
-    public MainWindow() throws HeadlessException {
+    public MainWindow(RefreshAware refreshAware) throws HeadlessException {
         setTitle(Resources.get("app.name.full"));
         setSize(600, 450);
         setPreferredSize(new Dimension(600, 560));
         setLocationRelativeTo(null);
-        buildUI();
+        buildUI(refreshAware);
     }
 
-    private void buildUI() {
+    private void buildUI(final RefreshAware refreshAware) {
         //top label
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -97,7 +98,12 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-        refreshButton = new JButton();
+        refreshButton = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refreshAware.refresh();
+            }
+        });
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 1));
         buttonPanel.add(Box.createGlue());
         buttonPanel.add(refreshButton);

@@ -33,7 +33,7 @@ public class PingWorker extends SwingWorker<Boolean, State> {
             try {
                 Configuration configuration = tmt.getConfiguration();
                 if (configuration != null && StringUtils.notEmpty(configuration.getTargetIp())) {
-                    publish(State.CONNECTED.equals(tmt.getState()) ? State.REFRESH_ON_SUCCESS : State.REFRESH_ON_FAILURE);
+                    publish(State.CONNECTED.equals(tmt.getState()) || State.NONE.equals(tmt.getState()) ? State.REFRESH_ON_SUCCESS : State.REFRESH_ON_FAILURE);
                     //ping
                     result = pinger.ping(configuration.getSourceIp(), configuration.getTargetIp(), configuration.getConnectionTimeout());
                 }

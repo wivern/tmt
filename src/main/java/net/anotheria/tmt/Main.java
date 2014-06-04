@@ -18,12 +18,12 @@ public class Main {
             @Override
             public void run() {
                 Resources.init();
-                MainWindow window = new MainWindow();
-                window.setVisible(true);
-
+                MainWindow window = null;
                 try {
                     Configuration configuration = ConfigurationManager.getConfiguration();
                     TMT tmt = new TMT(configuration);
+                    window = new MainWindow(tmt);
+                    window.setVisible(true);
                     tmt.addEventListener(window, StateChangedEventListener.class);
                     tmt.addEventListener(window, ConfigurationChangedEventListener.class);
                     tmt.addEventListener(window, LocaleChangedEventListener.class);
@@ -45,7 +45,7 @@ public class Main {
                 } catch (ConfigurationException e) {
                     JOptionPane.showMessageDialog(window, Resources.get("messages.config.file-read-fail"),
                             Resources.get("app.generic-error"), JOptionPane.ERROR_MESSAGE);
-                    window.dispose();
+                    if (window != null) window.dispose();
                 }
             }
         });
