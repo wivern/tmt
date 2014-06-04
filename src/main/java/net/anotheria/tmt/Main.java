@@ -14,6 +14,7 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                Resources.init();
                 MainWindow window = new MainWindow();
                 window.setVisible(true);
 
@@ -28,7 +29,7 @@ public class Main {
                         window.addWindowListener(new WindowAdapter() {
                             @Override
                             public void windowClosing(WindowEvent e) {
-                                systemTray.displayMessage("Application is still running.");
+                                systemTray.displayMessage(Resources.get("messages.still-running"));
                             }
                         });
                         tmt.addStateChangedListener(systemTray);
@@ -37,8 +38,8 @@ public class Main {
                     }
                     tmt.start();
                 } catch (ConfigurationException e) {
-                    JOptionPane.showMessageDialog(window, "Configuration file is failed to read.",
-                            "TMT Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(window, Resources.get("messages.config.file-read-fail"),
+                            Resources.get("app.generic-error"), JOptionPane.ERROR_MESSAGE);
                     window.dispose();
                 }
             }

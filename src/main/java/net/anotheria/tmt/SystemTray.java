@@ -51,9 +51,8 @@ public class SystemTray implements StateChangedEventListener {
         refresh();
     }
 
-    @SuppressWarnings("unused")
     public void displayMessage(String text) {
-        trayIcon.displayMessage("TMT", text, TrayIcon.MessageType.INFO);
+        trayIcon.displayMessage(Resources.get("app.name.short"), text, TrayIcon.MessageType.INFO);
     }
 
     private void refresh() {
@@ -81,7 +80,7 @@ public class SystemTray implements StateChangedEventListener {
 
         final JPopupMenu popup = new JPopupMenu();
 
-        JMenuItem restore = new JMenuItem("Open");
+        JMenuItem restore = new JMenuItem(Resources.get("app.open"));
         restore.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 window.setVisible(true);
@@ -89,7 +88,7 @@ public class SystemTray implements StateChangedEventListener {
         });
         popup.add(restore);
 
-        JMenuItem exit = new JMenuItem("Exit");
+        JMenuItem exit = new JMenuItem(Resources.get("app.exit"));
         exit.addActionListener( new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
@@ -97,7 +96,7 @@ public class SystemTray implements StateChangedEventListener {
         });
         popup.add(exit);
 
-        trayIcon = new TrayIcon(grey, "TMT");
+        trayIcon = new TrayIcon(grey, Resources.get("app.name.short"));
         trayIcon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {

@@ -21,18 +21,18 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
     private Bulb bulb;
     private JTextField statusText;
     private Map<State, String> stateStatusMap = new HashMap<State, String>() {{
-        put(State.CONNECTED, "Connected");
-        put(State.DISCONNECTED, "Disconnected");
-        put(State.REFRESH_ON_SUCCESS, "Connecting");
-        put(State.REFRESH_ON_FAILURE, "Connecting");
-        put(State.NONE, "No target IP provided");
+        put(State.CONNECTED, Resources.get("state.connected"));
+        put(State.DISCONNECTED, Resources.get("state.disconnected"));
+        put(State.REFRESH_ON_SUCCESS, Resources.get("state.refresh-on-success"));
+        put(State.REFRESH_ON_FAILURE, Resources.get("state.refresh-on-failure"));
+        put(State.NONE, Resources.get("state.ip-not-provided"));
     }};
     private JTextField myIPText;
     private JTextField wanIPText;
     private JTextArea debugText;
 
     public MainWindow() throws HeadlessException {
-        setTitle("TMT");
+        setTitle(Resources.get("app.name.full"));
         setSize(600, 450);
         setPreferredSize(new Dimension(600, 560));
         setLocationRelativeTo(null);
@@ -47,14 +47,6 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.PAGE_AXIS));
-        JLabel label = new JLabel("Tunnel Management Tool");
-        label.setAlignmentX(CENTER_ALIGNMENT);
-        Font font = label.getFont();
-        if (font != null) {
-            label.setFont(new Font(font.getName(), Font.BOLD, 14));
-        }
-//        topPanel.add(label);
-//        topPanel.add(Box.createRigidArea(new Dimension(0, 32)));
 
         panel.add(topPanel, BorderLayout.PAGE_START);
         //form panel
@@ -64,7 +56,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new SpringLayout());
         //status
-        JLabel status = new JLabel("Status");
+        JLabel status = new JLabel(Resources.get("app.gui.status"));
         statusText = new JTextField("", 15);
         statusText.setEditable(false);
         statusText.setMaximumSize(statusText.getPreferredSize());
@@ -72,14 +64,14 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
         formPanel.add(status);
         formPanel.add(statusText);
         //my ip
-        JLabel myIP = new JLabel("My IP");
+        JLabel myIP = new JLabel(Resources.get("app.gui.my-ip"));
         myIPText = new JTextField("", 15);
         myIPText.setMaximumSize(myIPText.getPreferredSize());
         myIP.setLabelFor(myIPText);
         formPanel.add(myIP);
         formPanel.add(myIPText);
         //wan ip
-        JLabel wanIP = new JLabel("WAN IP");
+        JLabel wanIP = new JLabel(Resources.get("app.gui.wan-ip"));
         wanIPText = new JTextField("", 15);
         Dimension size = wanIPText.getPreferredSize();
         size.setSize(10000, size.getHeight());
@@ -100,7 +92,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
         //Debug
         JPanel debugPanel = new JPanel();
         debugPanel.setLayout(new BoxLayout(debugPanel, BoxLayout.PAGE_AXIS));
-        JLabel debug = new JLabel("Debug");
+        JLabel debug = new JLabel(Resources.get("app.gui.debug"));
         debugText = new JTextArea();
         JScrollPane scrollPane = new JScrollPane(debugText);
         scrollPane.setAlignmentX(LEFT_ALIGNMENT);
@@ -112,7 +104,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-        JButton refreshButton = new JButton("Refresh");
+        JButton refreshButton = new JButton(Resources.get("app.gui.refresh"));
 
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 1));
         buttonPanel.add(Box.createGlue());
