@@ -18,6 +18,32 @@ public class ConfigurationImpl implements Configuration {
         return refreshOnSuccess;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ConfigurationImpl that = (ConfigurationImpl) o;
+
+        if (connectionTimeout != that.connectionTimeout) return false;
+        if (refreshOnFailure != that.refreshOnFailure) return false;
+        if (refreshOnSuccess != that.refreshOnSuccess) return false;
+        if (sourceIp != null ? !sourceIp.equals(that.sourceIp) : that.sourceIp != null) return false;
+        if (targetIp != null ? !targetIp.equals(that.targetIp) : that.targetIp != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = refreshOnSuccess;
+        result = 31 * result + refreshOnFailure;
+        result = 31 * result + connectionTimeout;
+        result = 31 * result + (targetIp != null ? targetIp.hashCode() : 0);
+        result = 31 * result + (sourceIp != null ? sourceIp.hashCode() : 0);
+        return result;
+    }
+
     public void setRefreshOnSuccess(int refreshOnSuccess) {
         this.refreshOnSuccess = refreshOnSuccess;
     }

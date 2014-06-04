@@ -20,6 +20,7 @@ public class Main {
                 try {
                     Configuration configuration = ConfigurationManager.getConfiguration();
                     TMT tmt = new TMT(configuration);
+                    tmt.addConfigurationChangedEventListener(window);
                     tmt.addStateChangedListener(window);
                     if (java.awt.SystemTray.isSupported()) {
                         final SystemTray systemTray = new SystemTray(window);

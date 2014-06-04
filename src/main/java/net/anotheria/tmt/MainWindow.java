@@ -1,5 +1,8 @@
 package net.anotheria.tmt;
 
+import net.anotheria.tmt.config.Configuration;
+import net.anotheria.tmt.events.ConfigurationChangedEvent;
+import net.anotheria.tmt.events.ConfigurationChangedEventListener;
 import net.anotheria.tmt.events.StateChangedEvent;
 import net.anotheria.tmt.events.StateChangedEventListener;
 import net.anotheria.tmt.utils.SpringUtilities;
@@ -14,7 +17,7 @@ import java.util.Map;
  * @author VKoulakov
  * @since 03.06.14 14:05
  */
-public class MainWindow extends JFrame implements StateChangedEventListener {
+public class MainWindow extends JFrame implements StateChangedEventListener, ConfigurationChangedEventListener {
     private Bulb bulb;
     private JTextField statusText;
     private Map<State, String> stateStatusMap = new HashMap<State, String>() {{
@@ -24,6 +27,9 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
         put(State.REFRESH_ON_FAILURE, "Connecting");
         put(State.NONE, "No target IP provided");
     }};
+    private JTextField myIPText;
+    private JTextField wanIPText;
+    private JTextArea debugText;
 
     public MainWindow() throws HeadlessException {
         setTitle("TMT");
@@ -67,14 +73,14 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
         formPanel.add(statusText);
         //my ip
         JLabel myIP = new JLabel("My IP");
-        JTextField myIPText = new JTextField("", 15);
+        myIPText = new JTextField("", 15);
         myIPText.setMaximumSize(myIPText.getPreferredSize());
         myIP.setLabelFor(myIPText);
         formPanel.add(myIP);
         formPanel.add(myIPText);
         //wan ip
         JLabel wanIP = new JLabel("WAN IP");
-        JTextField wanIPText = new JTextField("", 15);
+        wanIPText = new JTextField("", 15);
         Dimension size = wanIPText.getPreferredSize();
         size.setSize(10000, size.getHeight());
         wanIPText.setMaximumSize(size);
@@ -95,7 +101,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
         JPanel debugPanel = new JPanel();
         debugPanel.setLayout(new BoxLayout(debugPanel, BoxLayout.PAGE_AXIS));
         JLabel debug = new JLabel("Debug");
-        JTextArea debugText = new JTextArea();
+        debugText = new JTextArea();
         JScrollPane scrollPane = new JScrollPane(debugText);
         scrollPane.setAlignmentX(LEFT_ALIGNMENT);
         debug.setLabelFor(debugText);
@@ -131,5 +137,15 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
     @Override
     public void stateChanged(StateChangedEvent event) {
         setState(event.getState());
+    }
+
+    @Override
+    public void configurationChanged(ConfigurationChangedEvent event) {
+        Configuration configuration = event.getConfiguration();
+        if (configuration != null){
+            myIPText.setText(configuration.getSourceIp());
+            wanIPText.setText(configuration.getTargetIp());
+            debugText.setText(configuration.getDebugMessage());
+        }
     }
 }

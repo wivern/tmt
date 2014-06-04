@@ -1,29 +1,61 @@
 package net.anotheria.tmt;
 
 import net.anotheria.tmt.config.Configuration;
+import net.anotheria.tmt.events.ConfigurationChangedEvent;
+import net.anotheria.tmt.events.ConfigurationChangedEventListener;
 import net.anotheria.tmt.events.StateChangedEvent;
 import net.anotheria.tmt.events.StateChangedEventListener;
+import net.anotheria.tmt.pinger.NativePinger;
+import net.anotheria.tmt.process.ConfigWorker;
+import net.anotheria.tmt.process.PingWorker;
+import net.anotheria.tmt.utils.StringUtils;
 
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
+import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.EventListener;
+import java.util.EventObject;
 
 /**
  * @author VKoulakov
  * @since 04.06.14 13:05
  */
 public class TMT {
+    public final AbstractAction CONFIG_REFRESH_ACTION = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new ConfigWorker(TMT.this).execute();
+        }
+    };
+
+    public final AbstractAction PING_ACTION = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new PingWorker(TMT.this, new NativePinger()).execute();
+        }
+    };
     protected EventListenerList listenerList = new EventListenerList();
     private Configuration configuration;
     private State state;
+    private Timer confTimer;
+    private Timer pingTimer;
 
     public TMT(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    public void start(){
-       setState(State.NONE);
+    public void start() {
+        setState(State.NONE);
+        fireConfigurationChanged(new ConfigurationChangedEvent(this, configuration));
+        setConfiguration(configuration);
+        restartPingWorker(configuration);
     }
 
-    protected void setState(State state){
+    protected void setState(State state) {
         this.state = state;
         fireStateChanged(new StateChangedEvent(this, state));
     }
@@ -36,14 +68,93 @@ public class TMT {
         listenerList.add(StateChangedEventListener.class, listener);
     }
 
+    public void addConfigurationChangedEventListener(ConfigurationChangedEventListener listener) {
+        listenerList.add(ConfigurationChangedEventListener.class, listener);
+    }
+
     public void removeStateChangedListener(StateChangedEventListener listener) {
         listenerList.remove(StateChangedEventListener.class, listener);
     }
 
+    public void removeConfigurationChanged(ConfigurationChangedEventListener listener) {
+        listenerList.remove(ConfigurationChangedEventListener.class, listener);
+    }
+
     protected void fireStateChanged(StateChangedEvent event) {
-        StateChangedEventListener[] listeners = listenerList.getListeners(StateChangedEventListener.class);
-        for (StateChangedEventListener l : listeners) {
-            l.stateChanged(event);
+        fireEvent(event, StateChangedEventListener.class, new FireEventCallback<StateChangedEvent, StateChangedEventListener>() {
+            @Override
+            public void onEvent(StateChangedEvent event, StateChangedEventListener listener) {
+                listener.stateChanged(event);
+            }
+        });
+    }
+
+    protected void fireConfigurationChanged(ConfigurationChangedEvent event) {
+        fireEvent(event, ConfigurationChangedEventListener.class, new FireEventCallback<ConfigurationChangedEvent, ConfigurationChangedEventListener>() {
+            @Override
+            public void onEvent(ConfigurationChangedEvent event, ConfigurationChangedEventListener listener) {
+                listener.configurationChanged(event);
+            }
+        });
+    }
+
+    protected <E extends EventObject, L extends EventListener> void fireEvent(E event, Class<L> listenerClass, FireEventCallback<E, L> callback) {
+        L[] listeners = listenerList.getListeners(listenerClass);
+        for (L l : listeners) {
+            callback.onEvent(event, l);
         }
+    }
+
+    public void setConfiguration(Configuration configuration) {
+        fireConfigurationChanged(new ConfigurationChangedEvent(this, configuration));
+        //start config reload
+        restartConfigReload(configuration);
+        //start ping worker
+        if (configuration != null && !configuration.equals(this.configuration)){
+            restartPingWorker(configuration);
+        }
+        this.configuration = configuration;
+    }
+
+    private void restartConfigReload(Configuration configuration) {
+        if (confTimer != null && confTimer.isRunning()){
+            confTimer.stop();
+        }
+        confTimer = new Timer(configuration.getRefreshConfig() * 1000, CONFIG_REFRESH_ACTION);
+        confTimer.start();
+    }
+
+    private void restartPingWorker(Configuration configuration) {
+        String targetIp = configuration.getTargetIp();
+        if (StringUtils.notEmpty(targetIp) && validateAddress(targetIp)){
+            int refresh = State.DISCONNECTED.equals(state) ? configuration.getRefreshOnFailure() : configuration.getRefreshOnSuccess();
+            pingTimer = new Timer(refresh * 1000, PING_ACTION);
+            pingTimer.setInitialDelay(0);
+            pingTimer.setRepeats(true);
+            pingTimer.start();
+        } else {
+            setState(State.NONE);
+        }
+    }
+
+    private boolean validateAddress(String address){
+        try {
+            InetAddress.getByName(address);
+            return true;
+        } catch (UnknownHostException e) {
+            return false;
+        }
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void changeState(State next) {
+        setState(next);
+    }
+
+    interface FireEventCallback<E extends EventObject, L extends EventListener> {
+        void onEvent(E event, L listener);
     }
 }

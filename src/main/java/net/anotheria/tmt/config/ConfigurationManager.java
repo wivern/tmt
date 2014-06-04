@@ -28,6 +28,16 @@ public class ConfigurationManager {
         return configuration;
     }
 
+    public static Configuration reread() throws ConfigurationException {
+        Configuration configuration = getConfiguration();
+        try {
+            readConfig((ConfigurationImpl) configuration);
+        } catch (IOException e) {
+            throw new ConfigurationException(e.getMessage());
+        }
+        return configuration;
+    }
+
     private static void readConfig(final ConfigurationImpl configuration) throws IOException {
         String configFile = System.getProperty("config");
         if (configFile == null){
