@@ -23,7 +23,7 @@ import java.util.Locale;
 public class SystemTray implements StateChangedEventListener, LocaleChangedEventListener {
     private JFrame window;
     private TrayIcon trayIcon;
-    private JMenuItem restore, language, exit;
+    private JMenuItem restore, exit;
     private JMenu languagesSubmenu;
     private State state;
 
