@@ -4,6 +4,8 @@ import net.anotheria.tmt.Pinger;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
 
 /**
  * @author VKoulakov
@@ -13,10 +15,21 @@ public class NativePinger implements Pinger {
     @Override
     public boolean ping(String sourceIp, String targetIp, int timeout) {
         try {
-            Thread.sleep(3000);
+//            Thread.sleep(3000);
             boolean result = InetAddress.getByName(targetIp).isReachable(timeout);
-            if (!result){
-
+            if (!result) {
+                SocketChannel sc = SocketChannel.open();
+                sc.configureBlocking(false);
+                sc.connect(new InetSocketAddress(targetIp, 445)); //SMB port by default
+                try {
+                    int retries = 0;
+                    while (!sc.finishConnect() && retries++ < 3) {
+                        Thread.sleep(timeout * 1000);
+                    }
+                    result = sc.isConnected();
+                } finally {
+                    sc.close();
+                }
             }
             return result;
         } catch (IOException e) {
