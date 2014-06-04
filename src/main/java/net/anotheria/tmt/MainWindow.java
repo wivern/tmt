@@ -7,8 +7,6 @@ import net.anotheria.tmt.widgets.Bulb;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,9 +15,7 @@ import java.util.Map;
  * @since 03.06.14 14:05
  */
 public class MainWindow extends JFrame implements StateChangedEventListener {
-    private SystemTray systemTray;
     private Bulb bulb;
-    private State state;
     private JTextField statusText;
     private Map<State, String> stateStatusMap = new HashMap<State, String>() {{
         put(State.CONNECTED, "Connected");
@@ -34,14 +30,6 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
         setSize(600, 450);
         setPreferredSize(new Dimension(600, 560));
         setLocationRelativeTo(null);
-
-        if (java.awt.SystemTray.isSupported()) {
-            systemTray = new SystemTray(this);
-            setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-        } else {
-            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        }
-
         buildUI();
     }
 
@@ -120,14 +108,6 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         JButton refreshButton = new JButton("Refresh");
 
-        // example message
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                systemTray.displayMessage("Refreshing.");
-            }
-        });
-
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 1));
         buttonPanel.add(Box.createGlue());
         buttonPanel.add(refreshButton);
@@ -137,13 +117,9 @@ public class MainWindow extends JFrame implements StateChangedEventListener {
 
         getContentPane().add(panel);
         pack();
-
-        bulb.setState(State.REFRESH_ON_SUCCESS);
-        systemTray.setState(State.REFRESH_ON_SUCCESS);
     }
 
     protected void setState(State state) {
-        this.state = state;
         bulb.setState(state);
         statusText.setText(getStatusText(state));
     }

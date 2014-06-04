@@ -1,5 +1,8 @@
 package net.anotheria.tmt;
 
+import net.anotheria.tmt.events.StateChangedEvent;
+import net.anotheria.tmt.events.StateChangedEventListener;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +17,7 @@ import java.io.IOException;
  * Date: 04.06.14
  * Time: 12:17
  */
-public class SystemTray {
+public class SystemTray implements StateChangedEventListener {
     private JFrame window;
     private TrayIcon trayIcon;
     private State state;
@@ -48,6 +51,7 @@ public class SystemTray {
         refresh();
     }
 
+    @SuppressWarnings("unused")
     public void displayMessage(String text) {
         trayIcon.displayMessage("TMT", text, TrayIcon.MessageType.INFO);
     }
@@ -100,9 +104,9 @@ public class SystemTray {
                 if(e.getButton() == MouseEvent.BUTTON1) {
                     window.setVisible(!window.isVisible());
                 } else if (e.isPopupTrigger()) {
-                    popup.setLocation(e.getX() - (popup.getWidth() / 2), e.getY() - popup.getHeight());
                     popup.setInvoker(popup);
                     popup.setVisible(true);
+                    popup.setLocation(e.getX() - (popup.getWidth() / 2), e.getY() - popup.getHeight());
                 }
             }
         });
@@ -126,6 +130,13 @@ public class SystemTray {
     }
 
     private void blinkStop() {
-        timer.stop();
+        if(timer != null) {
+            timer.stop();
+        }
+    }
+
+    @Override
+    public void stateChanged(StateChangedEvent event) {
+        setState(event.getState());
     }
 }
