@@ -4,6 +4,7 @@ import net.anotheria.tmt.events.LocaleChangedEvent;
 import net.anotheria.tmt.events.LocaleChangedEventListener;
 import net.anotheria.tmt.events.StateChangedEvent;
 import net.anotheria.tmt.events.StateChangedEventListener;
+import net.anotheria.tmt.utils.StringUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -23,7 +24,7 @@ import java.util.Locale;
 public class SystemTray implements StateChangedEventListener, LocaleChangedEventListener {
     private JFrame window;
     private TrayIcon trayIcon;
-    private JMenuItem restore, language, exit;
+    private JMenuItem restore, exit;
     private JMenu languagesSubmenu;
     private State state;
 
@@ -97,7 +98,7 @@ public class SystemTray implements StateChangedEventListener, LocaleChangedEvent
 
         languagesSubmenu = new JMenu();
         for(final Locale locale: Resources.getAvailableLocalizations()) {
-            JMenuItem lang = new JMenuItem(locale.getDisplayName());
+            JMenuItem lang = new JMenuItem(StringUtils.capitalizeFirstLetter(locale.getDisplayName(locale)));
             lang.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -121,7 +122,7 @@ public class SystemTray implements StateChangedEventListener, LocaleChangedEvent
             @Override
             public void mouseReleased(MouseEvent e) {
                 if(e.getButton() == MouseEvent.BUTTON1) {
-                    window.setVisible(!window.isVisible());
+                    window.setVisible(true);
                 } else if (e.isPopupTrigger()) {
                     popup.setInvoker(popup);
                     popup.setVisible(true);
