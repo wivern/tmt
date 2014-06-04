@@ -1,17 +1,32 @@
 package net.anotheria.tmt;
 
+import net.anotheria.tmt.events.StateChangedEvent;
+import net.anotheria.tmt.events.StateChangedEventListener;
 import net.anotheria.tmt.utils.SpringUtilities;
 import net.anotheria.tmt.widgets.Bulb;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author VKoulakov
  * @since 03.06.14 14:05
  */
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements StateChangedEventListener {
     private SystemTray systemTray;
+    private Bulb bulb;
+    private State state;
+    private JTextField statusText;
+
+    private Map<State, String> stateStatusMap = new HashMap<State, String>(){{
+        put(State.CONNECTED, "Connected");
+        put(State.DISCONNECTED, "Disconnected");
+        put(State.REFRESH_ON_SUCCESS, "Connecting");
+        put(State.REFRESH_ON_FAILURE, "Connecting");
+        put(State.NONE, "No target IP provided");
+    }};
 
     public MainWindow() throws HeadlessException {
         setTitle("TMT");
@@ -55,7 +70,7 @@ public class MainWindow extends JFrame {
         formPanel.setLayout(new SpringLayout());
         //status
         JLabel status = new JLabel("Status");
-        JTextField statusText = new JTextField("", 15);
+        statusText = new JTextField("", 15);
         statusText.setEditable(false);
         statusText.setMaximumSize(statusText.getPreferredSize());
         status.setLabelFor(statusText);
@@ -81,7 +96,7 @@ public class MainWindow extends JFrame {
         SpringUtilities.makeCompactGrid(formPanel, 3, 2, 0, 5, 10, 5);
 
         formBulbPanel.add(formPanel);
-        Bulb bulb = new Bulb();
+        bulb = new Bulb();
         bulb.setMaximumSize(new Dimension(64, 64));
         formBulbPanel.add(bulb);
 
@@ -116,5 +131,20 @@ public class MainWindow extends JFrame {
 
         bulb.setState(State.REFRESH_ON_SUCCESS);
         systemTray.setState(State.REFRESH_ON_SUCCESS);
+    }
+
+    protected void setState(State state){
+        this.state = state;
+        bulb.setState(state);
+        statusText.setText(getStatusText(state));
+    }
+
+    private String getStatusText(State state) {
+        return stateStatusMap.get(state);
+    }
+
+    @Override
+    public void stateChanged(StateChangedEvent event) {
+        setState(event.getState());
     }
 }

@@ -2,70 +2,21 @@ package net.anotheria.tmt.config;
 
 /**
  * @author VKoulakov
- * @since 03.06.14 18:50
+ * @since 04.06.14 13:17
  */
-public class Configuration {
-    private int refreshOnSuccess = 30;
-    private int refreshOnFailure = 10;
-    private int refreshConfig = 10;
-    private String debugMessage;
-    private int connectionTimeout = 30;
-    private String targetIp;
-    private String sourceIp;
+public interface Configuration {
 
-    public int getRefreshOnSuccess() {
-        return refreshOnSuccess;
-    }
+    int getRefreshOnSuccess();
 
-    public void setRefreshOnSuccess(int refreshOnSuccess) {
-        this.refreshOnSuccess = refreshOnSuccess;
-    }
+    int getRefreshOnFailure();
 
-    public int getRefreshOnFailure() {
-        return refreshOnFailure;
-    }
+    int getRefreshConfig();
 
-    public void setRefreshOnFailure(int refreshOnFailure) {
-        this.refreshOnFailure = refreshOnFailure;
-    }
+    String getDebugMessage();
 
-    public int getRefreshConfig() {
-        return refreshConfig;
-    }
+    int getConnectionTimeout();
 
-    public void setRefreshConfig(int refreshConfig) {
-        this.refreshConfig = refreshConfig;
-    }
+    String getTargetIp();
 
-    public String getDebugMessage() {
-        return debugMessage;
-    }
-
-    public void setDebugMessage(String debugMessage) {
-        this.debugMessage = debugMessage;
-    }
-
-    public int getConnectionTimeout() {
-        return connectionTimeout;
-    }
-
-    public void setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
-    }
-
-    public String getTargetIp() {
-        return targetIp;
-    }
-
-    public void setTargetIp(String targetIp) {
-        this.targetIp = targetIp;
-    }
-
-    public String getSourceIp() {
-        return sourceIp;
-    }
-
-    public void setSourceIp(String sourceIp) {
-        this.sourceIp = sourceIp;
-    }
+    String getSourceIp();
 }

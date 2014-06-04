@@ -1,7 +1,5 @@
 package net.anotheria.tmt.config;
 
-import com.sun.jna.platform.FileUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,11 +14,11 @@ import java.util.Properties;
  */
 public class ConfigurationManager {
 
-    private static Configuration configuration;
+    private static ConfigurationImpl configuration;
 
     public static Configuration getConfiguration() throws ConfigurationException {
         if (configuration == null){
-            configuration = new Configuration();
+            configuration = new ConfigurationImpl();
             try {
                 readConfig(configuration);
             } catch (IOException e) {
@@ -30,7 +28,7 @@ public class ConfigurationManager {
         return configuration;
     }
 
-    private static void readConfig(Configuration configuration) throws IOException {
+    private static void readConfig(final ConfigurationImpl configuration) throws IOException {
         String configFile = System.getProperty("config");
         if (configFile == null){
             configFile = System.getProperty("user.dir") + File.separatorChar + "tmt.properties";
@@ -41,23 +39,62 @@ public class ConfigurationManager {
         }
         Properties properties = new Properties();
         properties.load(new FileInputStream(file));
-        for(String property : properties.stringPropertyNames()){
-            try {
-                Field field = configuration.getClass().getField(property);
-                String stringValue = properties.getProperty(property);
-                Type type = field.getType();
-                Object value = null;
-                if (type.equals(Integer.TYPE)){
-                    value = Integer.valueOf(stringValue);
-                } else if (type.equals(String.class)){
-                    value = stringValue;
-                }
-                field.set(configuration, value);
-            } catch (NoSuchFieldException ignored) {
-                System.out.println(ignored);
-            } catch (IllegalAccessException ignored) {
-                System.out.println(ignored);
+        setProperty("refreshOnSuccess", properties, Integer.class, new PropertySetter<Integer>() {
+            @Override
+            public void setProperty(Integer value) {
+                configuration.setRefreshOnSuccess(value);
+            }
+        });
+        setProperty("refreshOnFailure", properties, Integer.class, new PropertySetter<Integer>() {
+            @Override
+            public void setProperty(Integer value) {
+                configuration.setRefreshOnFailure(value);
+            }
+        });
+        setProperty("refreshConfig", properties, Integer.class, new PropertySetter<Integer>() {
+            @Override
+            public void setProperty(Integer value) {
+                configuration.setRefreshConfig(value);
+            }
+        });
+        setProperty("debugMessage", properties, String.class, new PropertySetter<String>() {
+            @Override
+            public void setProperty(String value) {
+                configuration.setDebugMessage(value);
+            }
+        });
+        setProperty("connectionTimeout", properties, Integer.class, new PropertySetter<Integer>() {
+            @Override
+            public void setProperty(Integer value) {
+                configuration.setConnectionTimeout(value);
+            }
+        });
+        setProperty("targetIp", properties, String.class, new PropertySetter<String>() {
+            @Override
+            public void setProperty(String value) {
+                configuration.setTargetIp(value);
+            }
+        });
+        setProperty("sourceIp", properties, String.class, new PropertySetter<String>() {
+            @Override
+            public void setProperty(String value) {
+                configuration.setSourceIp(value);
+            }
+        });
+    }
+
+    private static  <T> void setProperty(String propertyName, Properties properties, Class<T> type, PropertySetter<T> setter){
+        if (properties.containsKey(propertyName) && setter != null){
+            String value = properties.getProperty(propertyName);
+            if (String.class.isAssignableFrom(type)){
+                setter.setProperty(type.cast(value));
+            } else if (Integer.class.isAssignableFrom(type)){
+                setter.setProperty(type.cast(Integer.parseInt(value)));
             }
         }
+    }
+
+    interface PropertySetter<T>{
+        void setProperty(T value);
     }
 }
