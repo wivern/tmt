@@ -97,8 +97,10 @@ public class SystemTray {
         trayIcon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    popup.setLocation(e.getX(), e.getY());
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    window.setVisible(!window.isVisible());
+                } else if (e.isPopupTrigger()) {
+                    popup.setLocation(e.getX() - (popup.getWidth() / 2), e.getY() - popup.getHeight());
                     popup.setInvoker(popup);
                     popup.setVisible(true);
                 }
