@@ -121,7 +121,7 @@ public class SystemTray implements StateChangedEventListener, LocaleChangedEvent
             @Override
             public void mouseReleased(MouseEvent e) {
                 if(e.getButton() == MouseEvent.BUTTON1) {
-                    window.setVisible(!window.isVisible());
+                    window.setVisible(true);
                 } else if (e.isPopupTrigger()) {
                     popup.setInvoker(popup);
                     popup.setVisible(true);
