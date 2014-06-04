@@ -3,6 +3,9 @@ package net.anotheria.tmt;
 import net.anotheria.tmt.config.Configuration;
 import net.anotheria.tmt.config.ConfigurationException;
 import net.anotheria.tmt.config.ConfigurationManager;
+import net.anotheria.tmt.events.ConfigurationChangedEventListener;
+import net.anotheria.tmt.events.LocaleChangedEventListener;
+import net.anotheria.tmt.events.StateChangedEventListener;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -21,10 +24,11 @@ public class Main {
                 try {
                     Configuration configuration = ConfigurationManager.getConfiguration();
                     TMT tmt = new TMT(configuration);
-                    tmt.addConfigurationChangedEventListener(window);
-                    tmt.addStateChangedListener(window);
+                    tmt.addEventListener(window, StateChangedEventListener.class);
+                    tmt.addEventListener(window, ConfigurationChangedEventListener.class);
+                    tmt.addEventListener(window, LocaleChangedEventListener.class);
                     if (java.awt.SystemTray.isSupported()) {
-                        final SystemTray systemTray = new SystemTray(window);
+                        final SystemTray systemTray = new SystemTray(window, tmt);
                         window.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
                         window.addWindowListener(new WindowAdapter() {
                             @Override
@@ -32,7 +36,8 @@ public class Main {
                                 systemTray.displayMessage(Resources.get("messages.still-running"));
                             }
                         });
-                        tmt.addStateChangedListener(systemTray);
+                        tmt.addEventListener(systemTray, StateChangedEventListener.class);
+                        tmt.addEventListener(systemTray, LocaleChangedEventListener.class);
                     } else {
                         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                     }

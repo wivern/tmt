@@ -1,5 +1,7 @@
 package net.anotheria.tmt;
 
+import net.anotheria.tmt.events.LocaleChangedEvent;
+import net.anotheria.tmt.events.LocaleChangedEventListener;
 import net.anotheria.tmt.events.StateChangedEvent;
 import net.anotheria.tmt.events.StateChangedEventListener;
 
@@ -11,15 +13,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Locale;
 
 /**
  * User: AAbushkevich
  * Date: 04.06.14
  * Time: 12:17
  */
-public class SystemTray implements StateChangedEventListener {
+public class SystemTray implements StateChangedEventListener, LocaleChangedEventListener {
     private JFrame window;
     private TrayIcon trayIcon;
+    private JMenuItem restore, language, exit;
+    private JMenu languagesSubmenu;
     private State state;
 
     private Image grey;
@@ -29,9 +34,11 @@ public class SystemTray implements StateChangedEventListener {
     private Timer timer;
 
     private boolean blink = false;
+    private TMT tmt;
 
-    public SystemTray(JFrame window) {
+    public SystemTray(JFrame window, TMT tmt) {
         try {
+            this.tmt = tmt;
             this.window = window;
             grey = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/grey16.png"));
             red = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/red16.png"));
@@ -80,7 +87,7 @@ public class SystemTray implements StateChangedEventListener {
 
         final JPopupMenu popup = new JPopupMenu();
 
-        JMenuItem restore = new JMenuItem(Resources.get("app.open"));
+        restore = new JMenuItem();
         restore.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 window.setVisible(true);
@@ -88,7 +95,20 @@ public class SystemTray implements StateChangedEventListener {
         });
         popup.add(restore);
 
-        JMenuItem exit = new JMenuItem(Resources.get("app.exit"));
+        languagesSubmenu = new JMenu();
+        for(final Locale locale: Resources.getAvailableLocalizations()) {
+            JMenuItem lang = new JMenuItem(locale.getDisplayName());
+            lang.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    tmt.setLocale(locale);
+                }
+            });
+            languagesSubmenu.add(lang);
+        }
+        popup.add(languagesSubmenu);
+
+        exit = new JMenuItem();
         exit.addActionListener( new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
@@ -96,7 +116,7 @@ public class SystemTray implements StateChangedEventListener {
         });
         popup.add(exit);
 
-        trayIcon = new TrayIcon(grey, Resources.get("app.name.short"));
+        trayIcon = new TrayIcon(grey);
         trayIcon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -115,6 +135,8 @@ public class SystemTray implements StateChangedEventListener {
         } catch (AWTException ex) {
             System.err.println("TrayIcon could not be added.");
         }
+
+        refreshTextResources();
     }
 
     private void blinkStart() {
@@ -137,5 +159,17 @@ public class SystemTray implements StateChangedEventListener {
     @Override
     public void stateChanged(StateChangedEvent event) {
         setState(event.getState());
+    }
+
+    @Override
+    public void localeChanged(LocaleChangedEvent event) {
+        refreshTextResources();
+    }
+
+    private void refreshTextResources() {
+        restore.setText(Resources.get("app.open"));
+        languagesSubmenu.setText(Resources.get("app.languages"));
+        exit.setText(Resources.get("app.exit"));
+        trayIcon.setToolTip(Resources.get("app.name.short"));
     }
 }

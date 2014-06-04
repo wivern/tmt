@@ -1,10 +1,7 @@
 package net.anotheria.tmt;
 
 import net.anotheria.tmt.config.Configuration;
-import net.anotheria.tmt.events.ConfigurationChangedEvent;
-import net.anotheria.tmt.events.ConfigurationChangedEventListener;
-import net.anotheria.tmt.events.StateChangedEvent;
-import net.anotheria.tmt.events.StateChangedEventListener;
+import net.anotheria.tmt.events.*;
 import net.anotheria.tmt.utils.SpringUtilities;
 import net.anotheria.tmt.widgets.Bulb;
 
@@ -17,16 +14,12 @@ import java.util.Map;
  * @author VKoulakov
  * @since 03.06.14 14:05
  */
-public class MainWindow extends JFrame implements StateChangedEventListener, ConfigurationChangedEventListener {
+public class MainWindow extends JFrame implements StateChangedEventListener, ConfigurationChangedEventListener, LocaleChangedEventListener {
     private Bulb bulb;
+    private JLabel status, myIP, wanIP, debug;
+    private JButton refreshButton;
     private JTextField statusText;
-    private Map<State, String> stateStatusMap = new HashMap<State, String>() {{
-        put(State.CONNECTED, Resources.get("state.connected"));
-        put(State.DISCONNECTED, Resources.get("state.disconnected"));
-        put(State.REFRESH_ON_SUCCESS, Resources.get("state.refresh-on-success"));
-        put(State.REFRESH_ON_FAILURE, Resources.get("state.refresh-on-failure"));
-        put(State.NONE, Resources.get("state.ip-not-provided"));
-    }};
+    private Map<State, String> stateStatusMap;
     private JTextField myIPText;
     private JTextField wanIPText;
     private JTextArea debugText;
@@ -56,7 +49,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new SpringLayout());
         //status
-        JLabel status = new JLabel(Resources.get("app.gui.status"));
+        status = new JLabel();
         statusText = new JTextField("", 15);
         statusText.setEditable(false);
         statusText.setMaximumSize(statusText.getPreferredSize());
@@ -64,14 +57,14 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
         formPanel.add(status);
         formPanel.add(statusText);
         //my ip
-        JLabel myIP = new JLabel(Resources.get("app.gui.my-ip"));
+        myIP = new JLabel();
         myIPText = new JTextField("", 15);
         myIPText.setMaximumSize(myIPText.getPreferredSize());
         myIP.setLabelFor(myIPText);
         formPanel.add(myIP);
         formPanel.add(myIPText);
         //wan ip
-        JLabel wanIP = new JLabel(Resources.get("app.gui.wan-ip"));
+        wanIP = new JLabel();
         wanIPText = new JTextField("", 15);
         Dimension size = wanIPText.getPreferredSize();
         size.setSize(10000, size.getHeight());
@@ -92,7 +85,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
         //Debug
         JPanel debugPanel = new JPanel();
         debugPanel.setLayout(new BoxLayout(debugPanel, BoxLayout.PAGE_AXIS));
-        JLabel debug = new JLabel(Resources.get("app.gui.debug"));
+        debug = new JLabel();
         debugText = new JTextArea();
         JScrollPane scrollPane = new JScrollPane(debugText);
         scrollPane.setAlignmentX(LEFT_ALIGNMENT);
@@ -104,8 +97,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-        JButton refreshButton = new JButton(Resources.get("app.gui.refresh"));
-
+        refreshButton = new JButton();
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 1));
         buttonPanel.add(Box.createGlue());
         buttonPanel.add(refreshButton);
@@ -114,6 +106,7 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
         panel.add(buttonPanel, BorderLayout.PAGE_END);
 
         getContentPane().add(panel);
+        refreshTextResources();
         pack();
     }
 
@@ -139,5 +132,28 @@ public class MainWindow extends JFrame implements StateChangedEventListener, Con
             wanIPText.setText(configuration.getTargetIp());
             debugText.setText(configuration.getDebugMessage());
         }
+    }
+
+    @Override
+    public void localeChanged(LocaleChangedEvent event) {
+        refreshTextResources();
+    }
+
+    private void refreshTextResources() {
+        stateStatusMap = new HashMap<State, String>() {{
+            put(State.CONNECTED, Resources.get("state.connected"));
+            put(State.DISCONNECTED, Resources.get("state.disconnected"));
+            put(State.REFRESH_ON_SUCCESS, Resources.get("state.refresh-on-success"));
+            put(State.REFRESH_ON_FAILURE, Resources.get("state.refresh-on-failure"));
+            put(State.NONE, Resources.get("state.ip-not-provided"));
+        }};
+
+        setTitle(Resources.get("app.name.full"));
+        status.setText(Resources.get("app.gui.status"));
+        myIP.setText(Resources.get("app.gui.my-ip"));
+        wanIP.setText(Resources.get("app.gui.wan-ip"));
+        debug.setText(Resources.get("app.gui.debug"));
+        refreshButton.setText(Resources.get("app.gui.refresh"));
+        statusText.setText(getStatusText(bulb.getState()));
     }
 }
