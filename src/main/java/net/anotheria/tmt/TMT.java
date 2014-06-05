@@ -3,6 +3,7 @@ package net.anotheria.tmt;
 import net.anotheria.tmt.config.Configuration;
 import net.anotheria.tmt.events.*;
 import net.anotheria.tmt.pinger.NativePinger;
+import net.anotheria.tmt.pinger.ShortPastaPinger;
 import net.anotheria.tmt.process.ConfigWorker;
 import net.anotheria.tmt.process.PingWorker;
 import net.anotheria.tmt.utils.StringUtils;
@@ -48,7 +49,7 @@ public class TMT implements RefreshAware {
     }
 
     private void createPingWorker() {
-        pingWorker = new PingWorker(semaphore, this, new NativePinger());
+        pingWorker = new PingWorker(semaphore, this, new ShortPastaPinger());
     }
 
     public void start() {
